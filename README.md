@@ -16,7 +16,7 @@ graph TD
     Redis[(Redis Queue<br/>Broker & Backend)]
     Worker[Celery Worker<br/>Async Task Runner]
     Tavily[Tavily Search API<br/>Research Phase]
-    NVIDIA[NVIDIA NIM API<br/>Llama 3.1 LLM]
+    NVIDIA[NVIDIA NIM API<br/> LLM]
 
     Client -->|REST Requests| API
     API -->|Read/Write| DB
