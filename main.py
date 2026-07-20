@@ -49,12 +49,13 @@ ACTIVE_PLANNING_STATUSES = {
     "saving_checkpoint",
 }
 
+allowed_origins_raw = os.getenv("CORS_ALLOWED_ORIGINS") or os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,http://localhost:4173,http://127.0.0.1:4173",
+)
 allowed_origins = [
     origin.strip()
-    for origin in os.getenv(
-        "ALLOWED_ORIGINS",
-        "http://localhost:3000,http://localhost:4173,http://127.0.0.1:4173",
-    ).split(",")
+    for origin in allowed_origins_raw.split(",")
     if origin.strip()
 ]
 
@@ -77,6 +78,7 @@ if any(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=r"https://quillops-.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
@@ -85,6 +87,24 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup() -> None:
+    # Validate critical environment variables in production
+    database_url = os.getenv("DATABASE_URL", "sqlite:///./quillops.db")
+    is_production = (
+        os.getenv("ENV") == "production" or
+        os.getenv("NODE_ENV") == "production" or
+        database_url.startswith("postgresql") or
+        database_url.startswith("postgres")
+    )
+    
+    if is_production:
+        jwt_secret = os.getenv("JWT_SECRET")
+        if not jwt_secret or jwt_secret == "change-this-in-production":
+            raise RuntimeError("CRITICAL ERROR: JWT_SECRET environment variable is missing or insecure in production.")
+        if not os.getenv("NVIDIA_API_KEY"):
+            raise RuntimeError("CRITICAL ERROR: NVIDIA_API_KEY is missing in production.")
+        if not os.getenv("TAVILY_API_KEY"):
+            raise RuntimeError("CRITICAL ERROR: TAVILY_API_KEY is missing in production.")
+            
     init_db()
 
 

@@ -20,15 +20,28 @@ export class ApiError extends Error {
   }
 }
 
-function localDevelopmentApi(): string | null {
-  if (!/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) return null;
-  if (window.location.port === "8000") return window.location.origin;
-  return `http://${window.location.hostname}:8000`;
-}
-
 export function getApiBaseUrl(): string {
-  const configured = document.querySelector<HTMLMetaElement>('meta[name="quillops-api-base"]')?.content.trim();
-  return (configured || localDevelopmentApi() || window.location.origin).replace(/\/$/, "");
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  const metaUrl = document.querySelector<HTMLMetaElement>('meta[name="quillops-api-base"]')?.content.trim();
+
+  // If in production mode:
+  if (import.meta.env.PROD) {
+    const targetUrl = envUrl || metaUrl;
+    if (!targetUrl) {
+      throw new Error("MISSING_PRODUCTION_API_CONFIG");
+    }
+    return targetUrl.replace(/\/$/, "");
+  }
+
+  // If in development mode:
+  const localDev = () => {
+    if (!/^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) return null;
+    if (window.location.port === "8000") return window.location.origin;
+    return `http://${window.location.hostname}:8000`;
+  };
+
+  const fallback = envUrl || metaUrl || localDev() || window.location.origin;
+  return fallback.replace(/\/$/, "");
 }
 
 function readStoredValue(key: string): string | null {
@@ -160,9 +173,35 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return data as T;
 }
 
+export function getErrorMessage(caught: unknown): string {
+  if (caught instanceof ApiError) {
+    if (caught.code === "network") {
+      return "Unable to reach the authentication server. Please try again shortly.";
+    }
+    if (caught.status === 401) {
+      return "Incorrect email address or password.";
+    }
+    if (caught.status === 429) {
+      return "Too many attempts. Please wait and try again.";
+    }
+    if (caught.status >= 500) {
+      return "The server could not complete the request. Please try again.";
+    }
+    return caught.message || "The request could not be completed.";
+  }
+  if (caught instanceof Error) {
+    if (caught.message === "MISSING_PRODUCTION_API_CONFIG") {
+      return "The application server is not configured for this deployment.";
+    }
+    return caught.message;
+  }
+  return "Authentication failed. Please try again.";
+}
+
 export const api = {
   get: <T = unknown>(path: string) => request<T>(path, { method: "GET" }),
   post: <T = unknown>(path: string, body?: unknown) => request<T>(path, { method: "POST", body }),
   put: <T = unknown>(path: string, body?: unknown) => request<T>(path, { method: "PUT", body }),
   delete: <T = unknown>(path: string) => request<T>(path, { method: "DELETE" }),
+  getErrorMessage,
 };
