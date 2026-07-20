@@ -13259,6 +13259,7 @@ function V2({ initialBlog: n, onBusy: r }) {
 
 Audience:`)[0];
   N.useEffect(() => {
+  }, [r]), N.useEffect(() => {
     const b = localStorage.getItem(_t);
     b && b !== n.content && E("A newer local edit is available. Open Edit mode to recover it.");
   }, [n.content, _t]), N.useEffect(() => {
@@ -13565,7 +13566,10 @@ ${oe}` : b;
             ] })
           ] }),
           Me === "error" && /* @__PURE__ */ a.jsxs("div", { className: "q-copilot-status is-error", style: { display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" }, children: [
-            /* @__PURE__ */ a.jsx("div", { style: { display: "flex", alignItems: "center", gap: "6px", color: "#f87171", fontSize: "0.68rem" }, children: /* @__PURE__ */ a.jsx("span", { children: "⚠ Unable to generate refinement." }) }),
+            /* @__PURE__ */ a.jsx("div", { style: { display: "flex", alignItems: "center", gap: "6px", color: "#f87171", fontSize: "0.68rem" }, children: /* @__PURE__ */ a.jsxs("span", { children: [
+              "⚠ ",
+              B || "Unable to generate refinement."
+            ] }) }),
             /* @__PURE__ */ a.jsx("button", { className: "btn btn-secondary", type: "button", style: { alignSelf: "flex-start", minHeight: "30px", fontSize: "0.6rem", padding: "0 10px" }, onClick: Wt, disabled: C, children: "Retry" })
           ] })
         ] }),
