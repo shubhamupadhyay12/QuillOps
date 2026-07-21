@@ -60,7 +60,7 @@ export function ArticleWorkspace({ initialBlog, onBusy }: { initialBlog: Article
   const analysis = useMemo(() => analyzeArticle(content, targetWords, citationsRequired), [citationsRequired, content, targetWords]);
   const outline = useMemo(() => [...content.matchAll(/^(##|###)\s+(.+)$/gm)].map((match, index) => ({ level: match[1].length, text: match[2], id: `section-${index}` })), [content]);
   const title = blog.title || content.match(/^#\s+(.+)$/m)?.[1] || blog.topic.split("\n\nAudience:")[0];
-
+  useEffect(() => {}, [onBusy]);
   useEffect(() => { const recovered = localStorage.getItem(recoveryKey); if (recovered && recovered !== initialBlog.content) setMessage("A newer local edit is available. Open Edit mode to recover it."); }, [initialBlog.content, recoveryKey]);
   useEffect(() => { if (mode !== "edit") return; const timer = window.setTimeout(() => localStorage.setItem(recoveryKey, content), 450); return () => window.clearTimeout(timer); }, [content, mode, recoveryKey]);
   useEffect(() => { const warn = (event: BeforeUnloadEvent) => { if (dirty) event.preventDefault(); }; window.addEventListener("beforeunload", warn); return () => window.removeEventListener("beforeunload", warn); }, [dirty]);
@@ -307,7 +307,7 @@ export function ArticleWorkspace({ initialBlog, onBusy }: { initialBlog: Article
           {refinementStatus === "error" && (
             <div className="q-copilot-status is-error" style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#f87171", fontSize: "0.68rem" }}>
-                <span>⚠ Unable to generate refinement.</span>
+                 <span>⚠ {refinementError || "Unable to generate refinement."}</span>
               </div>
               <button className="btn btn-secondary" type="button" style={{ alignSelf: "flex-start", minHeight: "30px", fontSize: "0.6rem", padding: "0 10px" }} onClick={retryRefine} disabled={busy}>Retry</button>
             </div>

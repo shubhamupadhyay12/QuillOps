@@ -54,7 +54,7 @@ export function AuthPage({ mode }: AuthPageProps) {
       setNotice(isLogin ? "Signed in. Opening your workspace…" : "Account created. Opening your workspace…");
       window.setTimeout(() => { window.location.hash = "#/dashboard"; }, reducedMotion ? 0 : 350);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Authentication failed. Please try again.");
+      setError(api.getErrorMessage(caught));
       setLoading(false);
     }
   };
