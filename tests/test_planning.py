@@ -187,7 +187,7 @@ class PlanningApiTests(unittest.TestCase):
         response = cls.client.post("/auth/register", json={"email": email, "password": "Planning-Test-2026!"})
         cls.headers = {"Authorization": f"Bearer {response.json()['access_token']}"}
 
-    @patch("main.generate_blog_task.delay")
+    @patch("main.dispatch_start_generation")
     def test_duplicate_active_submission_returns_existing_job(self, delay):
         payload = {"topic": f"Idempotency topic {uuid.uuid4()}"}
         first = self.client.post("/blogs", headers=self.headers, json=payload)
@@ -196,8 +196,8 @@ class PlanningApiTests(unittest.TestCase):
         self.assertEqual(first.json()["id"], second.json()["id"])
         self.assertEqual(delay.call_count, 1)
 
-    @patch("main.resume_blog_task.delay")
-    @patch("main.generate_blog_task.delay")
+    @patch("main.dispatch_resume_generation")
+    @patch("main.dispatch_start_generation")
     def test_failed_writing_retry_reuses_saved_plan_and_sections(self, _planning_delay, writing_delay):
         created = self.client.post(
             "/blogs", headers=self.headers, json={"topic": f"Writing retry {uuid.uuid4()}"}
@@ -224,8 +224,8 @@ class PlanningApiTests(unittest.TestCase):
         self.assertEqual(response.json()["status"], "queued_for_generation")
         self.assertEqual(writing_delay.call_count, 1)
 
-    @patch("main.ai_edit_blog_task.delay")
-    @patch("main.generate_blog_task.delay")
+    @patch("main.dispatch_ai_edit")
+    @patch("main.dispatch_start_generation")
     def test_ai_edit_is_queued_without_overwriting_completed_content(self, _planning_delay, edit_delay):
         created = self.client.post(
             "/blogs", headers=self.headers, json={"topic": f"AI edit {uuid.uuid4()}"}
@@ -247,7 +247,7 @@ class PlanningApiTests(unittest.TestCase):
             self.assertEqual(db.get(Blog, created["id"]).content, original)
         self.assertEqual(edit_delay.call_count, 1)
 
-    @patch("main.generate_blog_task.delay")
+    @patch("main.dispatch_start_generation")
     def test_manual_edit_and_restore_are_non_destructive(self, _planning_delay):
         created = self.client.post(
             "/blogs", headers=self.headers, json={"topic": f"Versions {uuid.uuid4()}"}
@@ -271,7 +271,7 @@ class PlanningApiTests(unittest.TestCase):
         self.assertEqual(restored.status_code, 200)
         self.assertEqual(restored.json()["current_version"], 2)
 
-    @patch("main.generate_blog_task.delay")
+    @patch("main.dispatch_start_generation")
     def test_retry_reuses_failed_job_without_duplicate_record(self, delay):
         created = self.client.post(
             "/blogs", headers=self.headers, json={"topic": f"Retry topic {uuid.uuid4()}"}
@@ -289,7 +289,7 @@ class PlanningApiTests(unittest.TestCase):
         self.assertEqual(retried.json()["attempt_number"], 2)
         self.assertEqual(retried.json()["status"], "queued")
 
-    @patch("main.generate_blog_task.delay")
+    @patch("main.dispatch_start_generation")
     def test_duplicate_plan_approval_is_rejected_without_second_task(self, generate_delay):
         created = self.client.post(
             "/blogs", headers=self.headers, json={"topic": f"Approval topic {uuid.uuid4()}"}
@@ -310,15 +310,16 @@ class PlanningApiTests(unittest.TestCase):
             blog.status = "waiting_for_review"
             blog.plan = plan
             db.commit()
-        with patch("main.resume_blog_task.delay") as resume_delay:
+        with patch("main.dispatch_resume_generation") as resume_delay:
             first = self.client.post(f"/blogs/{created['id']}/approve-plan", headers=self.headers, json={"plan": plan})
             second = self.client.post(f"/blogs/{created['id']}/approve-plan", headers=self.headers, json={"plan": plan})
         self.assertEqual(first.status_code, 202)
         self.assertEqual(second.status_code, 409)
         self.assertEqual(resume_delay.call_count, 1)
 
-    @patch("tasks.start_generation")
+    @patch("jobs.start_generation")
     def test_successful_planning_reaches_review_checkpoint(self, start_generation):
+        from jobs import run_start_generation_job
         with SessionLocal() as db:
             user = db.query(User).first()
             blog = Blog(user_id=user.id, thread_id=str(uuid.uuid4()), topic="Checkpoint test", status="queued")
@@ -337,7 +338,7 @@ class PlanningApiTests(unittest.TestCase):
             ],
         }
         start_generation.return_value = {"__interrupt__": [SimpleNamespace(value={"plan": plan})]}
-        generate_blog_task.run(blog_id)
+        run_start_generation_job(blog_id)
         with SessionLocal() as db:
             saved = db.get(Blog, blog_id)
             self.assertEqual(saved.status, "waiting_for_review")

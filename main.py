@@ -16,7 +16,7 @@ from auth import (
     verify_password,
 )
 from backend import ArticleValidationError, Plan, validate_article_markdown
-from database import init_db, utc_now
+from database import init_db, normalize_database_urls, utc_now
 from models import Blog, BlogVersion, User
 from schemas import (
     AIEditRequest,
@@ -31,7 +31,12 @@ from schemas import (
     TokenResponse,
     VersionResponse,
 )
-from tasks import ai_edit_blog_task, build_generation_state, generate_blog_task, resume_blog_task
+from dispatcher import (
+    dispatch_ai_edit,
+    dispatch_resume_generation,
+    dispatch_start_generation,
+)
+from jobs import build_generation_state
 
 app = FastAPI(
     title="QuillOps API",
@@ -88,15 +93,18 @@ app.add_middleware(
 @app.on_event("startup")
 def startup() -> None:
     # Validate critical environment variables in production
-    database_url = os.getenv("DATABASE_URL", "sqlite:///./quillops.db")
+    raw_db_url = os.getenv("DATABASE_URL")
+    sqlalchemy_url, psycopg_url = normalize_database_urls(raw_db_url)
+    
     is_production = (
         os.getenv("ENV") == "production" or
         os.getenv("NODE_ENV") == "production" or
-        database_url.startswith("postgresql") or
-        database_url.startswith("postgres")
+        bool(raw_db_url and (raw_db_url.startswith("postgresql") or raw_db_url.startswith("postgres")))
     )
     
     if is_production:
+        if not raw_db_url or sqlalchemy_url.startswith("sqlite"):
+            raise RuntimeError("CRITICAL ERROR: DATABASE_URL must be a PostgreSQL connection URL in production.")
         jwt_secret = os.getenv("JWT_SECRET")
         if not jwt_secret or jwt_secret == "change-this-in-production":
             raise RuntimeError("CRITICAL ERROR: JWT_SECRET environment variable is missing or insecure in production.")
@@ -185,7 +193,7 @@ def create_blog(
     db.commit()
     db.refresh(blog)
 
-    generate_blog_task.delay(blog.id)
+    dispatch_start_generation(blog.id)
     return blog
 
 
@@ -222,7 +230,7 @@ def retry_planning(
     blog.updated_at = utc_now()
     db.commit()
     db.refresh(blog)
-    generate_blog_task.delay(blog.id)
+    dispatch_start_generation(blog.id)
     return blog
 
 
@@ -295,7 +303,7 @@ def approve_plan(
     db.commit()
     db.refresh(blog)
 
-    resume_blog_task.delay(blog.id, validated_plan)
+    dispatch_resume_generation(blog.id, validated_plan)
     return blog
 
 
@@ -331,7 +339,7 @@ def retry_writing(
     blog.updated_at = utc_now()
     db.commit()
     db.refresh(blog)
-    resume_blog_task.delay(blog.id, blog.plan)
+    dispatch_resume_generation(blog.id, blog.plan)
     return blog
 
 
@@ -414,7 +422,7 @@ def ai_edit_blog(
     db.commit()
     db.refresh(blog)
 
-    ai_edit_blog_task.delay(blog.id, payload.instruction)
+    dispatch_ai_edit(blog.id, payload.instruction)
     return blog
 
 

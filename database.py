@@ -10,7 +10,38 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./quillops.db")
+def normalize_database_urls(raw_url: str | None) -> tuple[str, str]:
+    """
+    Normalizes a DATABASE_URL into a tuple of:
+    (sqlalchemy_url, psycopg_url)
+
+    - postgresql://...         -> (postgresql+psycopg://..., postgresql://...)
+    - postgres://...           -> (postgresql+psycopg://..., postgresql://...)
+    - postgresql+psycopg://... -> (postgresql+psycopg://..., postgresql://...)
+    - sqlite://...             -> (sqlite://..., sqlite://...)
+    - None or empty            -> ("sqlite:///./quillops.db", "sqlite:///./quillops.db")
+    """
+    if not raw_url:
+        return "sqlite:///./quillops.db", "sqlite:///./quillops.db"
+
+    if raw_url.startswith("postgresql+psycopg://"):
+        sqlalchemy_url = raw_url
+        psycopg_url = "postgresql://" + raw_url[len("postgresql+psycopg://"):]
+        return sqlalchemy_url, psycopg_url
+    elif raw_url.startswith("postgresql://"):
+        sqlalchemy_url = "postgresql+psycopg://" + raw_url[len("postgresql://"):]
+        psycopg_url = raw_url
+        return sqlalchemy_url, psycopg_url
+    elif raw_url.startswith("postgres://"):
+        sqlalchemy_url = "postgresql+psycopg://" + raw_url[len("postgres://"):]
+        psycopg_url = "postgresql://" + raw_url[len("postgres://"):]
+        return sqlalchemy_url, psycopg_url
+    else:
+        return raw_url, raw_url
+
+
+RAW_DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL, PSYCOPG_DATABASE_URL = normalize_database_urls(RAW_DATABASE_URL)
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 

@@ -948,16 +948,19 @@ _CHECKPOINTER_CONNECTION = None
 def _create_checkpointer():
     global _CHECKPOINTER_CONNECTION
 
-    database_url = os.getenv("DATABASE_URL", "sqlite:///./quillops.db")
+    from database import normalize_database_urls
 
-    if database_url.startswith("postgresql://") or database_url.startswith("postgres://"):
+    raw_url = os.getenv("DATABASE_URL")
+    sqlalchemy_url, psycopg_url = normalize_database_urls(raw_url)
+
+    if psycopg_url.startswith("postgresql://") or psycopg_url.startswith("postgres://"):
         import psycopg
         from psycopg.rows import dict_row
         from langgraph.checkpoint.postgres import PostgresSaver
 
         # A long-lived connection is kept for this worker/API process.
         _CHECKPOINTER_CONNECTION = psycopg.connect(
-            database_url,
+            psycopg_url,
             autocommit=True,
             row_factory=dict_row,
         )
@@ -967,7 +970,7 @@ def _create_checkpointer():
 
     from langgraph.checkpoint.sqlite import SqliteSaver
 
-    sqlite_path = database_url.removeprefix("sqlite:///")
+    sqlite_path = psycopg_url.removeprefix("sqlite:///")
     Path(sqlite_path).parent.mkdir(parents=True, exist_ok=True)
     _CHECKPOINTER_CONNECTION = sqlite3.connect(
         sqlite_path,
