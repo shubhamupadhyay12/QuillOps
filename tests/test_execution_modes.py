@@ -254,6 +254,16 @@ class TestExecutionModes(unittest.TestCase):
         self.assertNotIn("tasks", main.__dict__)
         self.assertNotIn("celery_app", main.__dict__)
 
+    def test_root_and_health_endpoints(self):
+        """Verify GET / returns backend info JSON and GET /health returns ok"""
+        root_resp = self.client.get("/")
+        self.assertEqual(root_resp.status_code, 200)
+        self.assertEqual(root_resp.json(), {"name": "QuillOps API", "status": "running"})
+
+        health_resp = self.client.get("/health")
+        self.assertEqual(health_resp.status_code, 200)
+        self.assertEqual(health_resp.json(), {"status": "ok"})
+
     def test_9_celery_mode_dispatches_via_delay(self):
         """9: Verify EXECUTION_MODE=celery dispatches via .delay()"""
         os.environ["EXECUTION_MODE"] = "celery"

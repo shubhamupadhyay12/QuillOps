@@ -508,8 +508,13 @@ def restore_version(
 
 
 # -----------------------------------------------------------------------------
-# Frontend SPA Static Mount
+# Root Information Endpoint
 # -----------------------------------------------------------------------------
-from fastapi.staticfiles import StaticFiles
 
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+
+@app.get("/")
+def root() -> dict:
+    return {
+        "name": "QuillOps API",
+        "status": "running",
+    }
