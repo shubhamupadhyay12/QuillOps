@@ -1,4 +1,4 @@
-import { api, quillOpsMarkMarkup } from '../../dist/landing.js?v=20260720d';
+import { api, quillOpsMarkMarkup } from '@/entry';
 import { renderAuthenticatedShell } from '../app-shell.js';
 
 let dashboardBlogs = [];

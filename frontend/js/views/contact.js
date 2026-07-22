@@ -1,4 +1,4 @@
-import { linkedInUrl, quillOpsMarkMarkup } from '../../dist/landing.js?v=20260720d';
+import { linkedInUrl, quillOpsMarkMarkup } from '@/entry';
 
 // Contact Us Page View for Shubham Upadhyay
 

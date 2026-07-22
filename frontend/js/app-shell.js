@@ -1,4 +1,4 @@
-import { auth, quillOpsMarkMarkup } from '../dist/landing.js?v=20260720d';
+import { auth, quillOpsMarkMarkup } from '@/entry';
 
 function escapeHtml(value = '') {
   return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');

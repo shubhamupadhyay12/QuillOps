@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  root: "frontend",
   plugins: [react()],
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
@@ -14,19 +15,8 @@ export default defineConfig({
   },
   build: {
     minify: "esbuild",
-    outDir: "frontend/dist",
+    outDir: "dist",
     emptyOutDir: true,
     cssCodeSplit: false,
-    lib: {
-      entry: fileURLToPath(new URL("./frontend/src/entry.tsx", import.meta.url)),
-      formats: ["es"],
-      fileName: () => "landing.js",
-    },
-    rollupOptions: {
-      output: {
-        assetFileNames: (assetInfo) =>
-          assetInfo.name?.endsWith(".css") ? "landing.css" : "[name][extname]",
-      },
-    },
   },
 });

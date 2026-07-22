@@ -1,8 +1,8 @@
 // QuillOps Client-Side SPA Hash Router
-import { renderDashboard } from './views/dashboard.js?v=20260720d';
-import { renderDetail } from './views/detail.js?v=20260720d';
-import { renderContact } from './views/contact.js?v=20260720a';
-import { auth, renderAuth, renderLanding, unmountReactView } from '../dist/landing.js?v=20260720d';
+import { renderDashboard } from './views/dashboard.js';
+import { renderDetail } from './views/detail.js';
+import { renderContact } from './views/contact.js';
+import { auth, renderAuth, renderLanding, unmountReactView } from '@/entry';
 
 const routes = {
   'home': { render: renderLanding, protected: false, isLanding: true },

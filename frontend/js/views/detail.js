@@ -1,5 +1,4 @@
-// Blog Detail & Polling Workspace View Handler
-import { api, renderArticleWorkspace, renderPlanningVisual, renderReviewWorkspace, renderWritingMissionControl, unmountPlanningVisual, unmountReviewWorkspace, unmountWorkflowWorkspace } from '../../dist/landing.js?v=20260720d';
+import { api, renderArticleWorkspace, renderPlanningVisual, renderReviewWorkspace, renderWritingMissionControl, unmountPlanningVisual, unmountReviewWorkspace, unmountWorkflowWorkspace } from '@/entry';
 import { PLANNING_STAGES as planningStages, planningStageIndex, renderPlanningTimeline } from '../workflow-status.js';
 import { renderAuthenticatedShell, updateAuthenticatedShell } from '../app-shell.js';
 
