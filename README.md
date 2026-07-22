@@ -54,7 +54,7 @@ QuillOps is built for **technical writers**, **developer advocates**, **engineer
 
 ## 📺 Live Demo
 
-🌐 **Live Application:** https://quillops.vercel.app
+🌐 **Live Application:** https://quill-ops.vercel.app
 
 ---
 
