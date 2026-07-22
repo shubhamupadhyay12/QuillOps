@@ -1,6 +1,6 @@
-import { ArrowDown, CheckCircle2, Database, Network, Server, Workflow } from "lucide-react";
+import { ArrowDown, CheckCircle2, Cpu, Database, Server, Workflow } from "lucide-react";
 
-const graphNodes = ["Router", "Research", "Planner", "Human Review", "Workers", "Reducer"];
+const graphNodes = ["Router", "Research", "Planner", "Human Review", "Writer", "Reducer"];
 
 export function ArchitectureSection() {
   return (
@@ -15,7 +15,7 @@ export function ArchitectureSection() {
         <div className="q-architecture-map" aria-label="QuillOps system architecture">
           <div className="q-arch-node"><Server aria-hidden="true" /><span><strong>FastAPI</strong><small>API + authentication</small></span></div>
           <ArrowDown className="q-arch-arrow" aria-hidden="true" />
-          <div className="q-arch-node"><Network aria-hidden="true" /><span><strong>Celery + Redis</strong><small>Background execution</small></span></div>
+          <div className="q-arch-node"><Cpu aria-hidden="true" /><span><strong>In-Process Dispatcher</strong><small>ThreadPoolExecutor background execution</small></span></div>
           <ArrowDown className="q-arch-arrow" aria-hidden="true" />
           <div className="q-langgraph-box">
             <div className="q-langgraph-title"><Workflow aria-hidden="true" /><span><strong>LangGraph</strong><small>Stateful orchestration</small></span></div>
@@ -24,7 +24,7 @@ export function ArchitectureSection() {
             </div>
           </div>
           <ArrowDown className="q-arch-arrow" aria-hidden="true" />
-          <div className="q-arch-node"><Database aria-hidden="true" /><span><strong>PostgreSQL + checkpoints</strong><small>Content, versions, workflow state</small></span></div>
+          <div className="q-arch-node"><Database aria-hidden="true" /><span><strong>Supabase PostgreSQL</strong><small>Content, versions, users, and workflow checkpoints</small></span></div>
         </div>
       </div>
     </section>

@@ -1,6 +1,13 @@
-import { Braces, GitBranch, Network } from "lucide-react";
+import { Braces, Cpu, GitBranch } from "lucide-react";
 
-const stack = ["FastAPI", "LangGraph", "Celery", "Redis", "PostgreSQL"];
+const stack = [
+  "React + Vite",
+  "FastAPI",
+  "In-Process Dispatcher",
+  "LangGraph",
+  "Supabase PostgreSQL",
+  "NVIDIA NIM + Tavily",
+];
 
 export function AboutSection() {
   return (
@@ -12,7 +19,7 @@ export function AboutSection() {
           <p>QuillOps is a human-in-the-loop technical writing system designed and developed by Shubham Upadhyay. It makes research, planning, approval, generation and revision visible instead of hiding the entire process behind one prompt.</p>
         </div>
         <div className="q-about-system" aria-label="QuillOps technology stack">
-          <div className="q-about-system-head"><Network aria-hidden="true" /><span><small>SYSTEM PROFILE</small><strong>Durable by design</strong></span></div>
+          <div className="q-about-system-head"><Cpu aria-hidden="true" /><span><small>SYSTEM PROFILE</small><strong>Durable by design</strong></span></div>
           <div className="q-about-stack">{stack.map((item, index) => <span key={item}><small>{String(index + 1).padStart(2, "0")}</small>{item}</span>)}</div>
           <div className="q-about-system-foot"><Braces aria-hidden="true" />Inspectable stages <GitBranch aria-hidden="true" />Recoverable revisions</div>
         </div>
