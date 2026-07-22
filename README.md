@@ -13,7 +13,7 @@
 
 <br />
 
-[Live Demo](#-demo) • [Architecture](#-architecture) • [Why LangGraph?](#-why-langgraph) • [Human-in-the-Loop Workflow](#-human-in-the-loop-workflow) • [Design Principles](#-design-principles) • [Quick Start](#-quick-start) • [Deployment](#-deployment)
+[About](#about-quillops) • [Architecture](#system-architecture) • [Why LangGraph?](#why-langgraph) • [Human-in-the-Loop Workflow](#human-in-the-loop-workflow) • [Design Principles](#design-principles) • [Local Development](#local-development) • [Deployment](#production-deployment)
 
 </div>
 
@@ -35,6 +35,7 @@
 
 ---
 
+<a id="about-quillops"></a>
 ## 💡 About QuillOps
 
 ### What is QuillOps?
@@ -71,6 +72,7 @@ QuillOps is built for **technical writers**, **developer advocates**, **engineer
 
 ---
 
+<a id="why-langgraph"></a>
 ## ⚙️ Why LangGraph?
 
 Traditional LLM chains (e.g., standard LangChain sequences or custom scripts) operate as linear, stateless functions. They execute from start to finish without pausing, making human intervention impossible during execution.
@@ -94,6 +96,7 @@ graph LR
 
 ---
 
+<a id="design-principles"></a>
 ## 📐 Design Principles
 
 QuillOps adheres to five core software engineering principles:
@@ -106,6 +109,7 @@ QuillOps adheres to five core software engineering principles:
 
 ---
 
+<a id="system-architecture"></a>
 ## 🏗️ System Architecture
 
 QuillOps decouples presentation, API orchestration, workflow execution, and relational storage.
@@ -215,6 +219,7 @@ graph TD
 
 ---
 
+<a id="human-in-the-loop-workflow"></a>
 ## 🔄 Human-in-the-Loop Workflow
 
 ```mermaid
@@ -351,6 +356,7 @@ QuillOps/
 
 ---
 
+<a id="local-development"></a>
 ## 💻 Local Development
 
 ### 1. Environment Setup
@@ -381,6 +387,7 @@ Open `http://localhost:4173` in your browser.
 
 ---
 
+<a id="production-deployment"></a>
 ## 🚢 Production Deployment
 
 ```mermaid
