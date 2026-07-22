@@ -465,7 +465,7 @@ Distributed under the MIT License. See `LICENSE` for details.
 
 **Shubham Upadhyay**
 * GitHub: [@shubhamupadhyay12](https://github.com/shubhamupadhyay12)
-* LinkedIn: [Shubham Upadhyay](https://www.linkedin.com/in/shubhamupadhyay12/)
+* LinkedIn: [Shubham Upadhyay](https://www.linkedin.com/in/shubhamupadhyay25/)
 
 ---
 
