@@ -11,8 +11,12 @@ export { api, auth } from "@/lib/api-client";
 export { quillOpsMarkMarkup } from "@/components/brand/quillops-mark-geometry";
 export { linkedInUrl } from "@/config/social-links";
 import { quillOpsFaviconMarkup } from "@/components/brand/quillops-mark-geometry";
+import { inject } from "@vercel/analytics";
 import "@/landing.css";
 import "@/focused-ui-fixes.css";
+
+// Initialize Vercel Web Analytics
+inject();
 
 let currentRoot: Root | null = null;
 let planningRoot: Root | null = null;
